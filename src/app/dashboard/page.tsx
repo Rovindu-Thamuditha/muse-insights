@@ -85,6 +85,7 @@ async function StatsContent({
             stats.totalMinutes % 60
           }m`}
           description={`Based on your top tracks for this period.`}
+          icon={Clock}
         />
         <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
         <StatCard title="New Artists" value={stats.newArtists} icon={Users} />
