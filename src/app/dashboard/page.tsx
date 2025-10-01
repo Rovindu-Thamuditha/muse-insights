@@ -123,7 +123,7 @@ async function StatsContent({
              <CardDescription>
               Based on your last 50 played tracks.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <ListeningByHourChart data={hourlyListeningData} />
           </CardContent>
