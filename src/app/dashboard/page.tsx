@@ -8,6 +8,7 @@ import { ListeningByHourChart } from "@/components/charts/listening-by-hour-char
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { addDays, format, getHours, startOfDay } from "date-fns";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const topTracks = await getTopTracks(timeRange);
@@ -35,8 +36,32 @@ async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
 async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_term" | "long_term" }) {
   const [stats, recentPlays] = await Promise.all([
     getStats(timeRange),
-    getRecentlyPlayed()
+    getRecentlyPlayed(50) // Fetch more for better charts
   ]);
+
+  const dailyListeningData = recentPlays.items.reduce((acc, play) => {
+    const date = format(new Date(play.played_at), "yyyy-MM-dd");
+    const minutes = play.track.duration_ms / 60000;
+    const existing = acc.find(d => d.date === date);
+    if (existing) {
+      existing.minutes += minutes;
+    } else {
+      acc.push({ date, minutes });
+    }
+    return acc;
+  }, [] as { date: string, minutes: number[] }[])
+  .map(d => ({ date: d.date, minutes: Math.round(d.minutes.reduce((a, b) => a + b, 0)) }))
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const hourlyListeningData = Array.from({ length: 24 }, (_, i) => ({
+    hour: `${String(i).padStart(2, '0')}:00`,
+    plays: 0,
+  }));
+  recentPlays.items.forEach(play => {
+    const hour = getHours(new Date(play.played_at));
+    hourlyListeningData[hour].plays += 1;
+  });
+
 
   return (
     <div className="grid gap-6 mt-4">
@@ -59,7 +84,7 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
             <CardTitle>Daily Listening</CardTitle>
           </CardHeader>
           <CardContent>
-            <DailyMinutesChart />
+            <DailyMinutesChart data={dailyListeningData} />
           </CardContent>
         </Card>
         <Card>
@@ -67,7 +92,7 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
             <CardTitle>Listening by Hour</CardTitle>
           </CardHeader>
           <CardContent>
-            <ListeningByHourChart />
+            <ListeningByHourChart data={hourlyListeningData} />
           </CardContent>
         </Card>
       </div>
@@ -77,7 +102,7 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
           <CardTitle>Recently Played</CardTitle>
         </CardHeader>
         <CardContent>
-          <RecentPlaysTable plays={recentPlays.items} />
+          <RecentPlaysTable plays={recentPlays.items.slice(0, 20)} />
         </CardContent>
       </Card>
     </div>

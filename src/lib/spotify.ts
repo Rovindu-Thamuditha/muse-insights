@@ -11,7 +11,7 @@ async function getAccessToken() {
 
 async function spotifyFetch(endpoint: string) {
   const accessToken = await getAccessToken();
-  const url = `${process.env.SPOTIFY_API_URL}${endpoint}`;
+  const url = `${process.env.NEXT_PUBLIC_SPOTIFY_API_URL || "https://api.spotify.com/v1"}${endpoint}`;
 
   const response = await fetch(url, {
     headers: {
@@ -39,6 +39,6 @@ export async function getTopArtists(timeRange: 'short_term' | 'medium_term' | 'l
   return spotifyFetch(`/me/top/artists?time_range=${timeRange}&limit=${limit}`);
 }
 
-export async function getRecentlyPlayed(limit = 20): Promise<{ items: SpotifyPlayHistory[] }> {
+export async function getRecentlyPlayed(limit = 50): Promise<{ items: SpotifyPlayHistory[] }> {
   return spotifyFetch(`/me/player/recently-played?limit=${limit}`);
 }
