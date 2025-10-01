@@ -1,3 +1,5 @@
+"use client";
+
 import { SmartInsight } from "@/components/app/smart-insight";
 
 export default function HistoryPage() {
