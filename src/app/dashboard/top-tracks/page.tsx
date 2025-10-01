@@ -14,9 +14,16 @@ import {
 } from "@/components/ui/table";
 import { getTopTracks } from "@/lib/spotify";
 import { formatDuration } from "@/lib/utils";
+import { getServerSession } from "next-auth";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default async function TopTracksPage() {
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/");
+  }
+
   const topTracks = await getTopTracks();
 
   return (

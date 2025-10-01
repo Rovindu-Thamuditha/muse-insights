@@ -1,7 +1,14 @@
 import { ArtistCard } from "@/components/app/artist-card";
 import { getTopArtists } from "@/lib/spotify";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function TopArtistsPage() {
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/");
+  }
+  
   const topArtists = await getTopArtists();
 
   return (

@@ -6,6 +6,8 @@ import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
 import { RecentPlaysTable } from "@/components/app/recent-plays-table";
 import { ListeningByHourChart } from "@/components/charts/listening-by-hour-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const topTracks = await getTopTracks(timeRange);
@@ -83,7 +85,12 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
 }
 
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/");
+  }
+
   return (
     <Tabs defaultValue="4-weeks">
       <div className="flex items-center justify-between">
