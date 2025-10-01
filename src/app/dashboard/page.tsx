@@ -9,15 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import { format, getHours } from "date-fns";
+import { format, getHours, startOfDay } from "date-fns";
 import type { SpotifyPlayHistory } from "@/lib/types";
 
 function getStatsFromHistory(history: SpotifyPlayHistory[]) {
-  const totalTime = history.reduce(
+  const totalTimeMs = history.reduce(
     (acc, play) => acc + play.track.duration_ms,
     0
   );
-  const totalMinutes = Math.floor(totalTime / 1000 / 60);
+  const totalMinutes = Math.floor(totalTimeMs / 60000);
 
   const artistCounts = history.reduce((acc, play) => {
     const artistName = play.track.artists[0]?.name || "Unknown Artist";
@@ -49,7 +49,7 @@ async function StatsContent({
 }) {
   const [topArtists, recentPlays] = await Promise.all([
     getTopArtists(timeRange),
-    getRecentlyPlayed(50),
+    getRecentlyPlayed(50), 
   ]);
 
   const stats = getStatsFromHistory(recentPlays.items);
@@ -63,19 +63,19 @@ async function StatsContent({
 
   const dailyListeningData = recentPlays.items
     .reduce((acc, play) => {
-      const date = format(new Date(play.played_at), "yyyy-MM-dd");
+      const date = format(startOfDay(new Date(play.played_at)), "yyyy-MM-dd");
       const minutes = play.track.duration_ms / 60000;
       const existing = acc.find((d) => d.date === date);
       if (existing) {
-        existing.minutes.push(minutes);
+        existing.minutes += minutes;
       } else {
-        acc.push({ date, minutes: [minutes] });
+        acc.push({ date, minutes: minutes });
       }
       return acc;
-    }, [] as { date: string; minutes: number[] }[])
+    }, [] as { date: string; minutes: number }[])
     .map((d) => ({
       date: d.date,
-      minutes: Math.round(d.minutes.reduce((a, b) => a + b, 0)),
+      minutes: Math.round(d.minutes),
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -93,7 +93,7 @@ async function StatsContent({
     <div className="grid gap-6 mt-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Time"
+          title="Total Time (Recent)"
           value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
             stats.totalMinutes % 60
           }m`}
@@ -101,8 +101,8 @@ async function StatsContent({
           icon={Clock}
         />
         <StatCard title="Top Genre" value={topGenreName} icon={Music} description={`Based on your ${timeRange.replace('_', ' ')} artists.`}/>
-        <StatCard title="Tracks Played" value={stats.totalTracks} icon={Disc} description="Based on your recent history."/>
-        <StatCard title="Most Played Artist" value={stats.mostPlayedArtist} icon={Users} description="Based on your recent history."/>
+        <StatCard title="Tracks Played (Recent)" value={stats.totalTracks} icon={Disc} description="Based on your recent history."/>
+        <StatCard title="Most Played Artist (Recent)" value={stats.mostPlayedArtist} icon={Users} description="Based on your recent history."/>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -123,7 +123,7 @@ async function StatsContent({
              <CardDescription>
               Based on your last 50 played tracks.
             </CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
             <ListeningByHourChart data={hourlyListeningData} />
           </CardContent>
