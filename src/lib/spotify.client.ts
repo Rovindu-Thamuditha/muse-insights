@@ -13,7 +13,7 @@ async function getAccessToken() {
 
 async function spotifyFetch(endpoint: string) {
   const accessToken = await getAccessToken();
-  const url = `${process.env.NEXT_PUBLIC_SPOTIFY_API_URL}${endpoint}`;
+  const url = `https://api.spotify.com/v1${endpoint}`;
 
   const response = await fetch(url, {
     headers: {

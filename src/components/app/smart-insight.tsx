@@ -28,8 +28,8 @@ export function SmartInsight() {
     startTransition(async () => {
       try {
         const [topTracks, topArtists] = await Promise.all([
-          getTopTracks(),
-          getTopArtists(),
+          getTopTracks('short_term'),
+          getTopArtists('short_term'),
         ]);
 
         const totalMinutes = topTracks.items.reduce((acc, track) => acc + track.duration_ms, 0) / 60000;
