@@ -13,11 +13,19 @@ import { format, getHours, startOfDay } from "date-fns";
 import type { SpotifyPlayHistory } from "@/lib/types";
 
 function getStatsFromHistory(history: SpotifyPlayHistory[]) {
+  if (!history || history.length === 0) {
+    return {
+      totalMinutes: 0,
+      totalTracks: 0,
+      mostPlayedArtist: "N/A",
+    };
+  }
+
   const totalTimeMs = history.reduce(
     (acc, play) => acc + play.track.duration_ms,
     0
   );
-  const totalMinutes = Math.floor(totalTimeMs / 60000);
+  const totalMinutes = Math.round(totalTimeMs / 60000);
 
   const artistCounts = history.reduce((acc, play) => {
     const artistName = play.track.artists[0]?.name || "Unknown Artist";
@@ -31,28 +39,20 @@ function getStatsFromHistory(history: SpotifyPlayHistory[]) {
     )[0] || "N/A";
 
   const totalTracks = history.length;
-  const avgDuration =
-    totalTracks > 0 ? totalMinutes / totalTracks : 0;
 
   return {
     totalMinutes,
     totalTracks,
     mostPlayedArtist,
-    avgListeningDuration: avgDuration.toFixed(2),
   };
 }
 
-async function StatsContent({
+async function TopItemsContent({
   timeRange,
 }: {
   timeRange: "short_term" | "medium_term" | "long_term";
 }) {
-  const [topArtists, recentPlays] = await Promise.all([
-    getTopArtists(timeRange),
-    getRecentlyPlayed(50), 
-  ]);
-
-  const stats = getStatsFromHistory(recentPlays.items);
+  const topArtists = await getTopArtists(timeRange);
 
   const topGenre = topArtists.items.flatMap((artist) => artist.genres).reduce((acc, genre) => {
     acc[genre] = (acc[genre] || 0) + 1;
@@ -60,6 +60,23 @@ async function StatsContent({
   }, {} as Record<string, number>);
 
   const topGenreName = Object.keys(topGenre).sort((a,b) => topGenre[b] - topGenre[a])[0] || 'N/A';
+
+  return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Top Genre" value={topGenreName} icon={Music} description={`Based on your ${timeRange.replace('_', ' ')} artists.`}/>
+        {/* Other stats based on timeRange can go here */}
+      </div>
+  );
+}
+
+export default async function OverviewPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect("/");
+  }
+
+  const recentPlays = await getRecentlyPlayed(50);
+  const stats = getStatsFromHistory(recentPlays.items);
 
   const dailyListeningData = recentPlays.items
     .reduce((acc, play) => {
@@ -90,47 +107,86 @@ async function StatsContent({
   });
 
   return (
-    <div className="grid gap-6 mt-4">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Time (Recent)"
-          value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
-            stats.totalMinutes % 60
-          }m`}
-          description={`Based on your last ${stats.totalTracks} tracks.`}
-          icon={Clock}
-        />
-        <StatCard title="Top Genre" value={topGenreName} icon={Music} description={`Based on your ${timeRange.replace('_', ' ')} artists.`}/>
-        <StatCard title="Tracks Played (Recent)" value={stats.totalTracks} icon={Disc} description="Based on your recent history."/>
-        <StatCard title="Most Played Artist (Recent)" value={stats.mostPlayedArtist} icon={Users} description="Based on your recent history."/>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold md:text-3xl">Overview</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Listening</CardTitle>
-             <CardDescription>
-              Based on your last 50 played tracks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DailyMinutesChart data={dailyListeningData} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Listening by Hour</CardTitle>
-             <CardDescription>
-              Based on your last 50 played tracks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ListeningByHourChart data={hourlyListeningData} />
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* Recent Activity Section */}
       <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>
+            Your listening stats based on the last 50 tracks played.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <StatCard
+                title="Listening Time"
+                value={`${Math.floor(stats.totalMinutes / 60)}h ${
+                  stats.totalMinutes % 60
+                }m`}
+                icon={Clock}
+              />
+              <StatCard title="Tracks Played" value={stats.totalTracks} icon={Disc} />
+              <StatCard title="Most Played Artist" value={stats.mostPlayedArtist} icon={Users} />
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Daily Listening</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DailyMinutesChart data={dailyListeningData} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Listening by Hour</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ListeningByHourChart data={hourlyListeningData} />
+                </CardContent>
+              </Card>
+            </div>
+        </CardContent>
+      </Card>
+
+
+      {/* Top Items Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle>Your Top Items</CardTitle>
+              <CardDescription>
+                Your top artists and genres based on different time periods.
+              </CardDescription>
+            </div>
+            <Tabs defaultValue="4-weeks" className="w-full md:w-auto">
+              <TabsList>
+                <TabsTrigger value="4-weeks">4 Weeks</TabsTrigger>
+                <TabsTrigger value="6-months">6 Months</TabsTrigger>
+                <TabsTrigger value="all-time">All Time</TabsTrigger>
+              </TabsList>
+              <TabsContent value="4-weeks" className="mt-4">
+                <TopItemsContent timeRange="short_term" />
+              </TabsContent>
+              <TabsContent value="6-months" className="mt-4">
+                <TopItemsContent timeRange="medium_term" />
+              </TabsContent>
+              <TabsContent value="all-time" className="mt-4">
+                <TopItemsContent timeRange="long_term" />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </CardHeader>
+      </Card>
+
+
+       <Card>
         <CardHeader>
           <CardTitle>Recently Played</CardTitle>
           <CardDescription>Your most recently played tracks.</CardDescription>
@@ -140,34 +196,5 @@ async function StatsContent({
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-export default async function OverviewPage() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/");
-  }
-
-  return (
-    <Tabs defaultValue="4-weeks">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold md:text-3xl">Overview</h1>
-        <TabsList>
-          <TabsTrigger value="4-weeks">4 Weeks</TabsTrigger>
-          <TabsTrigger value="6-months">6 Months</TabsTrigger>
-          <TabsTrigger value="all-time">All Time</TabsTrigger>
-        </TabsList>
-      </div>
-      <TabsContent value="4-weeks">
-        <StatsContent timeRange="short_term" />
-      </TabsContent>
-      <TabsContent value="6-months">
-        <StatsContent timeRange="medium_term" />
-      </TabsContent>
-      <TabsContent value="all-time">
-        <StatsContent timeRange="long_term" />
-      </TabsContent>
-    </Tabs>
   );
 }
