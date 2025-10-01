@@ -8,14 +8,11 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { user } from "@/lib/data";
-import { cn } from "@/lib/utils";
 import { BarChart3, LayoutDashboard, Music, Users } from "lucide-react";
 import Link from "next/link";
 import { NavItem } from "./nav-item";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -25,6 +22,9 @@ const navItems = [
 ];
 
 export function AppSidebar() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <Sidebar
       variant="sidebar"
@@ -63,14 +63,14 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-3 overflow-hidden">
           <Avatar className="size-8">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
-            <AvatarFallback>{user.name[0]}</AvatarFallback>
+            <AvatarImage src={user?.image || undefined} alt={user?.name || ""} />
+            <AvatarFallback>{user?.name?.[0]}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col text-sm">
             <span className="font-semibold text-foreground truncate">
-              {user.name}
+              {user?.name}
             </span>
-            <span className="text-muted-foreground truncate">{user.email}</span>
+            <span className="text-muted-foreground truncate">{user?.email}</span>
           </div>
         </div>
       </SidebarFooter>

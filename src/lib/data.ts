@@ -1,3 +1,7 @@
+// This file is now deprecated for user data. 
+// User data will be fetched from the session.
+// We will remove this file in a future step.
+
 import { PlaceHolderImages } from './placeholder-images';
 import type { User, Track, Artist, PlayHistory, ListeningStats, DailyListening, HourlyListening } from './types';
 

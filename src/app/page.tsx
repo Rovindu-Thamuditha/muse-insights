@@ -1,6 +1,8 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
-import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   return (
@@ -16,8 +18,12 @@ export default function LoginPage() {
           Unlock your personal Spotify listening story. Dive deep into the
           tracks, artists, and genres that define your year in music.
         </p>
-        <Button asChild size="lg" className="font-semibold">
-          <Link href="/dashboard">Log in with Spotify</Link>
+        <Button
+          onClick={() => signIn("spotify", { callbackUrl: "/dashboard" })}
+          size="lg"
+          className="font-semibold"
+        >
+          Log in with Spotify
         </Button>
       </div>
     </main>

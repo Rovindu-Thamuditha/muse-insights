@@ -10,11 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { user } from "@/lib/data";
 import { LogOut, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 
 const titleMap: { [key: string]: string } = {
   "/dashboard": "Overview",
@@ -26,6 +25,8 @@ const titleMap: { [key: string]: string } = {
 export function Header() {
   const pathname = usePathname();
   const title = titleMap[pathname] || "Dashboard";
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -40,8 +41,8 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="size-8">
-                <AvatarImage src={user.avatarUrl} alt={user.name} />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                <AvatarImage src={user?.image || undefined} alt={user?.name || ""} />
+                <AvatarFallback>{user?.name?.[0]}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -53,11 +54,9 @@ export function Header() {
               <span>Profile</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </Link>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
