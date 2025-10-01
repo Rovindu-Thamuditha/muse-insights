@@ -8,6 +8,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { BarChart3, LayoutDashboard, Music, Users } from "lucide-react";
 import Link from "next/link";
