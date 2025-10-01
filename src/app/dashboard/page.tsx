@@ -8,16 +8,17 @@ import { ListeningByHourChart } from "@/components/charts/listening-by-hour-char
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import { format, getHours } from "date-fns";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
-  const [topTracks, topArtists] = await Promise.all([
-    getTopTracks(timeRange, 50), // Fetch more tracks for a better estimate
+  const [topArtists, recentPlays] = await Promise.all([
     getTopArtists(timeRange),
+    getRecentlyPlayed(50), // Fetch max for calculations
   ]);
 
-  const totalTime = topTracks.items.reduce(
-    (acc, track) => acc + track.duration_ms,
+  const totalTime = recentPlays.items.reduce(
+    (acc, play) => acc + play.track.duration_ms,
     0
   );
   const totalMinutes = Math.floor(totalTime / 1000 / 60);
@@ -85,7 +86,7 @@ async function StatsContent({
           value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
             stats.totalMinutes % 60
           }m`}
-          description={`Based on your top 50 tracks for this period.`}
+          description={`Based on your last 50 tracks.`}
           icon={Clock}
         />
         <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
@@ -132,7 +133,7 @@ async function StatsContent({
 }
 
 export default async function OverviewPage() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/");
   }
