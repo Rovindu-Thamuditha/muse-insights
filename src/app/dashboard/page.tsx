@@ -1,6 +1,6 @@
 import { StatCard } from "@/components/app/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTopArtists, getTopTracks, getRecentlyPlayed } from "@/lib/spotify";
+import { getTopArtists, getRecentlyPlayed } from "@/lib/spotify";
 import { Clock, Disc, Music, Users } from "lucide-react";
 import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
 import { RecentPlaysTable } from "@/components/app/recent-plays-table";
@@ -10,33 +10,35 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { format, getHours } from "date-fns";
+import type { SpotifyPlayHistory } from "@/lib/types";
 
-async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
-  const [topArtists, recentPlays] = await Promise.all([
-    getTopArtists(timeRange),
-    getRecentlyPlayed(50), // Fetch max for calculations
-  ]);
-
-  const totalTime = recentPlays.items.reduce(
+function getStatsFromHistory(history: SpotifyPlayHistory[]) {
+  const totalTime = history.reduce(
     (acc, play) => acc + play.track.duration_ms,
     0
   );
   const totalMinutes = Math.floor(totalTime / 1000 / 60);
 
-  const genres = topArtists.items.flatMap((artist) => artist.genres);
-  const topGenre = genres.reduce((acc, genre) => {
-    acc[genre] = (acc[genre] || 0) + 1;
+  const artistCounts = history.reduce((acc, play) => {
+    const artistName = play.track.artists[0]?.name || "Unknown Artist";
+    acc[artistName] = (acc[artistName] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const topGenreName =
-    Object.keys(topGenre).sort((a, b) => topGenre[b] - topGenre[a])[0] || "N/A";
+  const mostPlayedArtist =
+    Object.keys(artistCounts).sort(
+      (a, b) => artistCounts[b] - artistCounts[a]
+    )[0] || "N/A";
+
+  const totalTracks = history.length;
+  const avgDuration =
+    totalTracks > 0 ? totalMinutes / totalTracks : 0;
 
   return {
     totalMinutes,
-    topGenre: topGenreName,
-    newArtists: 0, // Placeholder
-    decade: "2020s", // Placeholder
+    totalTracks,
+    mostPlayedArtist,
+    avgListeningDuration: avgDuration.toFixed(2),
   };
 }
 
@@ -45,10 +47,19 @@ async function StatsContent({
 }: {
   timeRange: "short_term" | "medium_term" | "long_term";
 }) {
-  const [stats, recentPlays] = await Promise.all([
-    getStats(timeRange),
-    getRecentlyPlayed(50), // Fetch max for better charts
+  const [topArtists, recentPlays] = await Promise.all([
+    getTopArtists(timeRange),
+    getRecentlyPlayed(50),
   ]);
+
+  const stats = getStatsFromHistory(recentPlays.items);
+
+  const topGenre = topArtists.items.flatMap((artist) => artist.genres).reduce((acc, genre) => {
+    acc[genre] = (acc[genre] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const topGenreName = Object.keys(topGenre).sort((a,b) => topGenre[b] - topGenre[a])[0] || 'N/A';
 
   const dailyListeningData = recentPlays.items
     .reduce((acc, play) => {
@@ -86,12 +97,12 @@ async function StatsContent({
           value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
             stats.totalMinutes % 60
           }m`}
-          description={`Based on your last 50 tracks.`}
+          description={`Based on your last ${stats.totalTracks} tracks.`}
           icon={Clock}
         />
-        <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
-        <StatCard title="New Artists" value={0} icon={Users} description="Coming soon" />
-        <StatCard title="Top Decade" value="2020s" icon={Disc} description="Coming soon" />
+        <StatCard title="Top Genre" value={topGenreName} icon={Music} description={`Based on your ${timeRange.replace('_', ' ')} artists.`}/>
+        <StatCard title="Tracks Played" value={stats.totalTracks} icon={Disc} description="Based on your recent history."/>
+        <StatCard title="Most Played Artist" value={stats.mostPlayedArtist} icon={Users} description="Based on your recent history."/>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
