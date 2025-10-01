@@ -1,3 +1,88 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-avatar",
+      "description": "User avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkzMDY0NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "artist-1",
+      "description": "Portrait of Tame Impala",
+      "imageUrl": "https://images.unsplash.com/photo-1549209486-09dafa74f944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtdXNpY2lhbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc1OTIyNjc5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "musician portrait"
+    },
+    {
+      "id": "artist-2",
+      "description": "Portrait of Glass Animals",
+      "imageUrl": "https://images.unsplash.com/photo-1575672913784-11a7cd4f25f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bXVzaWMlMjBiYW5kfGVufDB8fHx8MTc1OTMwOTk2M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "music band"
+    },
+    {
+      "id": "artist-3",
+      "description": "Portrait of Arctic Monkeys",
+      "imageUrl": "https://images.unsplash.com/photo-1605958611031-c91316261ab0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyb2NrJTIwYmFuZHxlbnwwfHx8fDE3NTkyNTIxNjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rock band"
+    },
+    {
+      "id": "artist-4",
+      "description": "Portrait of The Strokes",
+      "imageUrl": "https://images.unsplash.com/photo-1750188222535-fadd7f28e653?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiYW5kJTIwcGhvdG98ZW58MHx8fHwxNzU5MjkyNjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "band photo"
+    },
+    {
+      "id": "artist-5",
+      "description": "Portrait of Frank Ocean",
+      "imageUrl": "https://images.unsplash.com/photo-1615748562188-07be820cff5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzaW5nZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkzMTg5NDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "singer portrait"
+    },
+    {
+      "id": "album-1",
+      "description": "Album cover for Currents",
+      "imageUrl": "https://images.unsplash.com/photo-1500099817043-86d46000d58f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhbGJ1bSUyMGNvdmVyfGVufDB8fHx8MTc1OTI3OTM5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "album cover"
+    },
+    {
+      "id": "album-2",
+      "description": "Album cover for The Slow Rush",
+      "imageUrl": "https://images.unsplash.com/photo-1682685797365-41f45b562c0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhbGJ1bSUyMGFydHxlbnwwfHx8fDE3NTkyNDQwMTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "album art"
+    },
+    {
+      "id": "album-3",
+      "description": "Album cover for How to Be a Human Being",
+      "imageUrl": "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGFydHxlbnwwfHx8fDE3NTkyOTQ4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract art"
+    },
+    {
+      "id": "album-4",
+      "description": "Album cover for AM",
+      "imageUrl": "https://images.unsplash.com/photo-1608562719218-920013a7a249?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c291bmQlMjB3YXZlfGVufDB8fHx8MTc1OTIxNzA0NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sound wave"
+    },
+    {
+      "id": "album-5",
+      "description": "Album cover for Is This It",
+      "imageUrl": "https://images.unsplash.com/photo-1585854467604-cf2080ccef31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YWJzdHJhY3QlMjBwYXR0ZXJufGVufDB8fHx8MTc1OTMxNTI0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract pattern"
+    },
+    {
+      "id": "album-6",
+      "description": "Album cover for Blonde",
+      "imageUrl": "https://images.unsplash.com/photo-1642673400732-83ccec8bcc4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBtb25vY2hyb21lfGVufDB8fHx8MTc1OTI2Njk0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait monochrome"
+    },
+    {
+      "id": "album-7",
+      "description": "Album cover for ZABA",
+      "imageUrl": "https://images.unsplash.com/photo-1593519270884-779e9215de01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxqdW5nbGUlMjBpbGx1c3RyYXRpb258ZW58MHx8fHwxNzU5MzE4OTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jungle illustration"
+    },
+    {
+      "id": "album-8",
+      "description": "Album cover for Whatever People Say I Am, That's What I'm Not",
+      "imageUrl": "https://images.unsplash.com/photo-1620295642909-0e1f604c2eb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBzbW9raW5nfGVufDB8fHx8MTc1OTMxODk0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person smoking"
+    }
+  ]
 }
