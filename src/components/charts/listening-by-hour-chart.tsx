@@ -5,7 +5,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { hourlyListening } from "@/lib/data";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
@@ -15,12 +14,16 @@ const chartConfig = {
   },
 };
 
-export function ListeningByHourChart() {
+type ListeningByHourChartProps = {
+  data?: { hour: string; plays: number }[];
+};
+
+export function ListeningByHourChart({ data = [] }: ListeningByHourChartProps) {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <BarChart
         accessibilityLayer
-        data={hourlyListening}
+        data={data}
         margin={{
           top: 10,
           right: 10,

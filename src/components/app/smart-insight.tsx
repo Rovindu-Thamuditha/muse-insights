@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { dailyListening, hourlyListening, user } from "@/lib/data";
 import { Lightbulb, Wand2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { getTopArtists, getTopTracks } from "@/lib/spotify.client";
@@ -33,16 +32,18 @@ export function SmartInsight() {
           getTopArtists(),
         ]);
 
+        const totalMinutes = topTracks.items.reduce((acc, track) => acc + track.duration_ms, 0) / 60000;
+
         const listeningData = {
-          totalMinutes: dailyListening.reduce((sum, day) => sum + day.minutes, 0), // Placeholder
+          totalMinutes: Math.round(totalMinutes),
           topTracks: topTracks.items.slice(0, 5).map(t => ({ title: t.name, artist: t.artists.map(a => a.name).join(', ') })),
           topArtists: topArtists.items.slice(0, 3).map(a => a.name),
-          listeningDistribution: hourlyListening // Placeholder
+          listeningDistribution: "Not available" // Placeholder
         };
 
         const result = await generateSmartInsightsSummary({
           monthlyListeningData: JSON.stringify(listeningData, null, 2),
-          userProfile: JSON.stringify({ username: session.user?.name, joinDate: "2020-01-15" }, null, 2),
+          userProfile: JSON.stringify({ username: session.user?.name, joinDate: "Not available" }, null, 2),
         });
         setSummary(result.summary);
       } catch (error) {
