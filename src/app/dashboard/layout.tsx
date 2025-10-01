@@ -13,8 +13,21 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <Header />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-1 p-4 md:p-6">{children}</main>
+          <footer className="p-4 text-center text-xs text-muted-foreground">
+            Developed by{" "}
+            <a
+              href="https://github.com/Rovindu-Thamuditha"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground font-semibold"
+            >
+              Rovindu Thamuditha
+            </a>
+          </footer>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

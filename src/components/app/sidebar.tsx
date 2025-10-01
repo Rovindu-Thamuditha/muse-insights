@@ -75,17 +75,6 @@ export function AppSidebar() {
             <span className="text-muted-foreground truncate">{user?.email}</span>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground text-center px-2 pt-4 group-data-[collapsible=icon]:hidden">
-          Developed by{" "}
-          <a
-            href="https://github.com/Rovindu-Thamuditha"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-foreground"
-          >
-            Rovindu Thamuditha
-          </a>
-        </div>
       </SidebarFooter>
     </Sidebar>
   );
