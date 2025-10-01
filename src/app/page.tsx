@@ -26,6 +26,17 @@ export default function LoginPage() {
           Log in with Spotify
         </Button>
       </div>
+      <footer className="absolute bottom-4 text-center text-sm text-muted-foreground">
+        Developed by{" "}
+        <a
+          href="https://github.com/Rovindu-Thamuditha"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground font-semibold"
+        >
+          Rovindu Thamuditha
+        </a>
+      </footer>
     </main>
   );
 }
