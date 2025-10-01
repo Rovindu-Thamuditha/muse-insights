@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
 import { SpotifyPaginated, SpotifyTrack, SpotifyArtist, SpotifyPlayHistory } from "./types";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 async function getAccessToken() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.accessToken) {
     throw new Error("User not authenticated or access token missing");
   }
@@ -11,7 +12,7 @@ async function getAccessToken() {
 
 async function spotifyFetch(endpoint: string) {
   const accessToken = await getAccessToken();
-  const url = `${process.env.NEXT_PUBLIC_SPOTIFY_API_URL || "https://api.spotify.com/v1"}${endpoint}`;
+  const url = `${process.env.NEXT_PUBLIC_SPOTIFY_API_URL}${endpoint}`;
 
   const response = await fetch(url, {
     headers: {
