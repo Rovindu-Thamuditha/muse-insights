@@ -8,8 +8,9 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { BarChart3, LayoutDashboard, Music, Users } from "lucide-react";
 import Link from "next/link";
 import { NavItem } from "./nav-item";
@@ -59,7 +60,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarSeparator />
+      <Separator className="mx-2 my-1 w-auto bg-sidebar-border" />
 
       <SidebarFooter>
         <div className="flex items-center gap-3 overflow-hidden">
