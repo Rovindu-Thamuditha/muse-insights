@@ -1,6 +1,12 @@
 import { StatCard } from "@/components/app/stat-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTopArtists, getRecentlyPlayed } from "@/lib/spotify";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getTopArtists, getRecentlyPlayed, getTopTracks } from "@/lib/spotify";
 import { Clock, Disc, Music, Users } from "lucide-react";
 import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
 import { RecentPlaysTable } from "@/components/app/recent-plays-table";
@@ -10,7 +16,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { format, getHours, startOfDay } from "date-fns";
-import type { SpotifyPlayHistory } from "@/lib/types";
+import type { SpotifyPlayHistory, SpotifyTrack } from "@/lib/types";
 
 function getStatsFromHistory(history: SpotifyPlayHistory[]) {
   if (!history || history.length === 0) {
@@ -52,20 +58,52 @@ async function TopItemsContent({
 }: {
   timeRange: "short_term" | "medium_term" | "long_term";
 }) {
-  const topArtists = await getTopArtists(timeRange);
+  const [topArtists, topTracks] = await Promise.all([
+    getTopArtists(timeRange),
+    getTopTracks(timeRange, 50)
+  ]);
 
-  const topGenre = topArtists.items.flatMap((artist) => artist.genres).reduce((acc, genre) => {
-    acc[genre] = (acc[genre] || 0) + 1;
+  const topGenre = topArtists.items
+    .flatMap((artist) => artist.genres)
+    .reduce((acc, genre) => {
+      acc[genre] = (acc[genre] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const topGenreName =
+    Object.keys(topGenre).sort((a, b) => topGenre[b] - topGenre[a])[0] || "N/A";
+
+  const topTracksStats = getStatsFromHistory(topTracks.items.map(t => ({ track: t, played_at: '', context: null! })));
+
+  const totalMinutes = Math.round(topTracks.items.reduce((acc, t) => acc + t.duration_ms, 0) / 60000);
+
+  const artistCounts = topTracks.items.reduce((acc, play) => {
+    const artistName = play.artists[0]?.name || "Unknown Artist";
+    acc[artistName] = (acc[artistName] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
-  const topGenreName = Object.keys(topGenre).sort((a,b) => topGenre[b] - topGenre[a])[0] || 'N/A';
+  
+  const mostPlayedArtist = Object.keys(artistCounts).sort((a, b) => artistCounts[b] - artistCounts[a])[0] || "N/A";
 
   return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Top Genre" value={topGenreName} icon={Music} description={`Based on your ${timeRange.replace('_', ' ')} artists.`}/>
-        {/* Other stats based on timeRange can go here */}
-      </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        title="Total Playtime"
+        value={`${Math.floor(totalMinutes / 60)}h ${
+          totalMinutes % 60
+        }m`}
+        icon={Clock}
+        description="Based on your top 50 tracks"
+      />
+       <StatCard title="Tracks Played" value={topTracks.items.length} icon={Disc} description="Your most played tracks" />
+       <StatCard title="Top Artist" value={mostPlayedArtist} icon={Users} description="From your top 50 tracks"/>
+      <StatCard
+        title="Top Genre"
+        value={topGenreName}
+        icon={Music}
+        description={`Based on your top artists`}
+      />
+    </div>
   );
 }
 
@@ -96,7 +134,6 @@ export default async function OverviewPage() {
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-
   const hourlyListeningData = Array.from({ length: 24 }, (_, i) => ({
     hour: `${String(i).padStart(2, "0")}:00`,
     plays: 0,
@@ -115,45 +152,58 @@ export default async function OverviewPage() {
       {/* Recent Activity Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
-            Your listening stats based on the last 50 tracks played.
-          </CardDescription>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>
+                Your listening stats based on the last 50 tracks played.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
-           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <StatCard
-                title="Listening Time"
-                value={`${Math.floor(stats.totalMinutes / 60)}h ${
-                  stats.totalMinutes % 60
-                }m`}
-                icon={Clock}
-              />
-              <StatCard title="Tracks Played" value={stats.totalTracks} icon={Disc} />
-              <StatCard title="Most Played Artist" value={stats.mostPlayedArtist} icon={Users} />
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <StatCard
+              title="Listening Time"
+              value={`${Math.floor(stats.totalMinutes / 60)}h ${
+                stats.totalMinutes % 60
+              }m`}
+              icon={Clock}
+            />
+            <StatCard
+              title="Tracks Played"
+              value={stats.totalTracks}
+              icon={Disc}
+            />
+            <StatCard
+              title="Most Played Artist"
+              value={stats.mostPlayedArtist}
+              icon={Users}
+            />
+          </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Daily Listening</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <DailyMinutesChart data={dailyListeningData} />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Listening by Hour</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ListeningByHourChart data={hourlyListeningData} />
-                </CardContent>
-              </Card>
-            </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Daily Listening</CardTitle>
+                <CardDescription>From your last 50 plays</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DailyMinutesChart data={dailyListeningData} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Listening by Hour</CardTitle>
+                 <CardDescription>From your last 50 plays</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ListeningByHourChart data={hourlyListeningData} />
+              </CardContent>
+            </Card>
+          </div>
         </CardContent>
       </Card>
-
 
       {/* Top Items Section */}
       <Card>
@@ -185,8 +235,7 @@ export default async function OverviewPage() {
         </CardHeader>
       </Card>
 
-
-       <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Recently Played</CardTitle>
           <CardDescription>Your most recently played tracks.</CardDescription>
