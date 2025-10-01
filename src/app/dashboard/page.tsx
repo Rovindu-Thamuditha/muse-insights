@@ -11,8 +11,10 @@ import { redirect } from "next/navigation";
 import { format, getHours } from "date-fns";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
-  const topTracks = await getTopTracks(timeRange);
-  const topArtists = await getTopArtists(timeRange);
+  const [topTracks, topArtists] = await Promise.all([
+    getTopTracks(timeRange),
+    getTopArtists(timeRange)
+  ]);
 
   const totalTime = topTracks.items.reduce((acc, track) => acc + track.duration_ms, 0);
   const totalMinutes = Math.floor(totalTime / 1000 / 60);
