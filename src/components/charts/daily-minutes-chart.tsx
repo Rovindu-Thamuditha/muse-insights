@@ -5,7 +5,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { dailyListening } from "@/lib/data";
 import { format } from "date-fns";
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -16,12 +15,16 @@ const chartConfig = {
   },
 };
 
-export function DailyMinutesChart() {
+type DailyMinutesChartProps = {
+  data?: { date: string; minutes: number }[];
+}
+
+export function DailyMinutesChart({ data = [] }: DailyMinutesChartProps) {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <LineChart
         accessibilityLayer
-        data={dailyListening}
+        data={data}
         margin={{
           left: 12,
           right: 12,

@@ -1,12 +1,11 @@
 import { StatCard } from "@/components/app/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTopArtists, getTopTracks, getRecentlyPlayed } from "@/lib/spotify";
-import { Clock, Disc, Mic, Music, Users } from "lucide-react";
+import { Clock, Disc, Music, Users } from "lucide-react";
 import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
 import { RecentPlaysTable } from "@/components/app/recent-plays-table";
 import { ListeningByHourChart } from "@/components/charts/listening-by-hour-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { stats } from "@/lib/data"; // Will be removed in a later step, kept for now to avoid breaking other components
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const topTracks = await getTopTracks(timeRange);
@@ -26,8 +25,8 @@ async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   return {
     totalMinutes,
     topGenre: topGenreName,
-    newArtists: stats.newArtists, // Placeholder
-    decade: stats.decade, // Placeholder
+    newArtists: 0, // Placeholder
+    decade: "2020s", // Placeholder
   };
 }
 
