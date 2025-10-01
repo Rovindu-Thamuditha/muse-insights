@@ -1,5 +1,5 @@
 import { StatCard } from "@/components/app/stat-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTopArtists, getTopTracks, getRecentlyPlayed } from "@/lib/spotify";
 import { Clock, Disc, Music, Users } from "lucide-react";
 import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
@@ -13,20 +13,24 @@ import { format, getHours } from "date-fns";
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const [topTracks, topArtists] = await Promise.all([
     getTopTracks(timeRange),
-    getTopArtists(timeRange)
+    getTopArtists(timeRange),
   ]);
 
-  const totalTime = topTracks.items.reduce((acc, track) => acc + track.duration_ms, 0);
+  const totalTime = topTracks.items.reduce(
+    (acc, track) => acc + track.duration_ms,
+    0
+  );
   const totalMinutes = Math.floor(totalTime / 1000 / 60);
 
-  const genres = topArtists.items.flatMap(artist => artist.genres);
+  const genres = topArtists.items.flatMap((artist) => artist.genres);
   const topGenre = genres.reduce((acc, genre) => {
     acc[genre] = (acc[genre] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const topGenreName = Object.keys(topGenre).sort((a, b) => topGenre[b] - topGenre[a])[0] || 'N/A';
-  
+  const topGenreName =
+    Object.keys(topGenre).sort((a, b) => topGenre[b] - topGenre[a])[0] || "N/A";
+
   return {
     totalMinutes,
     topGenre: topGenreName,
@@ -35,35 +39,42 @@ async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   };
 }
 
-async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_term" | "long_term" }) {
+async function StatsContent({
+  timeRange,
+}: {
+  timeRange: "short_term" | "medium_term" | "long_term";
+}) {
   const [stats, recentPlays] = await Promise.all([
     getStats(timeRange),
-    getRecentlyPlayed(50) // Fetch more for better charts
+    getRecentlyPlayed(50), // Fetch more for better charts
   ]);
 
-  const dailyListeningData = recentPlays.items.reduce((acc, play) => {
-    const date = format(new Date(play.played_at), "yyyy-MM-dd");
-    const minutes = play.track.duration_ms / 60000;
-    const existing = acc.find(d => d.date === date);
-    if (existing) {
-      existing.minutes.push(minutes);
-    } else {
-      acc.push({ date, minutes: [minutes] });
-    }
-    return acc;
-  }, [] as { date: string, minutes: number[] }[])
-  .map(d => ({ date: d.date, minutes: Math.round(d.minutes.reduce((a, b) => a + b, 0)) }))
-  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const dailyListeningData = recentPlays.items
+    .reduce((acc, play) => {
+      const date = format(new Date(play.played_at), "yyyy-MM-dd");
+      const minutes = play.track.duration_ms / 60000;
+      const existing = acc.find((d) => d.date === date);
+      if (existing) {
+        existing.minutes.push(minutes);
+      } else {
+        acc.push({ date, minutes: [minutes] });
+      }
+      return acc;
+    }, [] as { date: string; minutes: number[] }[])
+    .map((d) => ({
+      date: d.date,
+      minutes: Math.round(d.minutes.reduce((a, b) => a + b, 0)),
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const hourlyListeningData = Array.from({ length: 24 }, (_, i) => ({
-    hour: `${String(i).padStart(2, '0')}:00`,
+    hour: `${String(i).padStart(2, "0")}:00`,
     plays: 0,
   }));
-  recentPlays.items.forEach(play => {
+  recentPlays.items.forEach((play) => {
     const hour = getHours(new Date(play.played_at));
     hourlyListeningData[hour].plays += 1;
   });
-
 
   return (
     <div className="grid gap-6 mt-4">
@@ -73,7 +84,7 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
           value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
             stats.totalMinutes % 60
           }m`}
-          icon={Clock}
+          description={`Based on your top tracks for this period.`}
         />
         <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
         <StatCard title="New Artists" value={stats.newArtists} icon={Users} />
@@ -84,6 +95,9 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
         <Card>
           <CardHeader>
             <CardTitle>Daily Listening</CardTitle>
+             <CardDescription>
+              Based on your last 50 played tracks.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <DailyMinutesChart data={dailyListeningData} />
@@ -92,6 +106,9 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
         <Card>
           <CardHeader>
             <CardTitle>Listening by Hour</CardTitle>
+             <CardDescription>
+              Based on your last 50 played tracks.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ListeningByHourChart data={hourlyListeningData} />
@@ -102,15 +119,15 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
       <Card>
         <CardHeader>
           <CardTitle>Recently Played</CardTitle>
+          <CardDescription>Your most recently played tracks.</CardDescription>
         </CardHeader>
         <CardContent>
-          <RecentPlaysTable plays={recentPlays.items.slice(0, 20)} />
+          <RecentPlaysTable plays={recentPlays.items.slice(0, 10)} />
         </CardContent>
       </Card>
     </div>
   );
 }
-
 
 export default async function OverviewPage() {
   const session = await getServerSession();
