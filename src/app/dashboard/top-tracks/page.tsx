@@ -12,11 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { topTracks } from "@/lib/data";
+import { getTopTracks } from "@/lib/spotify";
 import { formatDuration } from "@/lib/utils";
 import Image from "next/image";
 
-export default function TopTracksPage() {
+export default async function TopTracksPage() {
+  const topTracks = await getTopTracks();
+
   return (
     <Card>
       <CardHeader>
@@ -33,32 +35,32 @@ export default function TopTracksPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {topTracks.map((track, index) => (
+            {topTracks.items.map((track, index) => (
               <TableRow key={track.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-4">
                     <Image
-                      src={track.albumArtUrl}
-                      alt={track.album}
+                      src={track.album.images[0]?.url}
+                      alt={track.album.name}
                       width={40}
                       height={40}
                       className="rounded-md"
                       data-ai-hint="album cover"
                     />
                     <div className="grid gap-0.5">
-                      <p className="font-medium truncate">{track.title}</p>
+                      <p className="font-medium truncate">{track.name}</p>
                       <p className="text-sm text-muted-foreground truncate">
-                        {track.artist}
+                        {track.artists.map((a) => a.name).join(", ")}
                       </p>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {track.album}
+                  {track.album.name}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatDuration(track.duration)}
+                  {formatDuration(track.duration_ms / 1000)}
                 </TableCell>
               </TableRow>
             ))}

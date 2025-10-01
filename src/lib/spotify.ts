@@ -1,0 +1,44 @@
+import { getServerSession } from "next-auth";
+import { SpotifyPaginated, SpotifyTrack, SpotifyArtist, SpotifyPlayHistory } from "./types";
+
+async function getAccessToken() {
+  const session = await getServerSession();
+  if (!session || !session.accessToken) {
+    throw new Error("User not authenticated or access token missing");
+  }
+  return session.accessToken;
+}
+
+async function spotifyFetch(endpoint: string) {
+  const accessToken = await getAccessToken();
+  const url = `${process.env.SPOTIFY_API_URL}${endpoint}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    next: {
+        revalidate: 60 // Revalidate every 60 seconds
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error(`Spotify API Error: ${response.status} ${response.statusText}`, error);
+    throw new Error(`Failed to fetch from Spotify: ${error.error?.message || response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function getTopTracks(timeRange: 'short_term' | 'medium_term' | 'long_term' = 'medium_term', limit = 20): Promise<SpotifyPaginated<SpotifyTrack>> {
+  return spotifyFetch(`/me/top/tracks?time_range=${timeRange}&limit=${limit}`);
+}
+
+export async function getTopArtists(timeRange: 'short_term' | 'medium_term' | 'long_term' = 'medium_term', limit = 20): Promise<SpotifyPaginated<SpotifyArtist>> {
+  return spotifyFetch(`/me/top/artists?time_range=${timeRange}&limit=${limit}`);
+}
+
+export async function getRecentlyPlayed(limit = 20): Promise<{ items: SpotifyPlayHistory[] }> {
+  return spotifyFetch(`/me/player/recently-played?limit=${limit}`);
+}

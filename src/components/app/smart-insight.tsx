@@ -5,28 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { dailyListening, hourlyListening, topArtists, topTracks, user } from "@/lib/data";
+import { dailyListening, hourlyListening, user } from "@/lib/data";
 import { Lightbulb, Wand2 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { getTopArtists, getTopTracks } from "@/lib/spotify.client";
+import { useSession } from "next-auth/react";
 
 export function SmartInsight() {
   const [isPending, startTransition] = useTransition();
   const [summary, setSummary] = useState<string | null>(null);
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   const handleGenerateSummary = () => {
+    if (!session) {
+      toast({
+        variant: "destructive",
+        title: "Not Authenticated",
+        description: "You need to be logged in to generate a summary.",
+      });
+      return;
+    }
     startTransition(async () => {
       try {
+        const [topTracks, topArtists] = await Promise.all([
+          getTopTracks(),
+          getTopArtists(),
+        ]);
+
         const listeningData = {
-            totalMinutes: dailyListening.reduce((sum, day) => sum + day.minutes, 0),
-            topTracks: topTracks.slice(0, 5).map(t => ({ title: t.title, artist: t.artist })),
-            topArtists: topArtists.slice(0, 3).map(a => a.name),
-            listeningDistribution: hourlyListening
+          totalMinutes: dailyListening.reduce((sum, day) => sum + day.minutes, 0), // Placeholder
+          topTracks: topTracks.items.slice(0, 5).map(t => ({ title: t.name, artist: t.artists.map(a => a.name).join(', ') })),
+          topArtists: topArtists.items.slice(0, 3).map(a => a.name),
+          listeningDistribution: hourlyListening // Placeholder
         };
 
         const result = await generateSmartInsightsSummary({
-            monthlyListeningData: JSON.stringify(listeningData, null, 2),
-            userProfile: JSON.stringify({ username: user.name, joinDate: "2020-01-15" }, null, 2),
+          monthlyListeningData: JSON.stringify(listeningData, null, 2),
+          userProfile: JSON.stringify({ username: session.user?.name, joinDate: "2020-01-15" }, null, 2),
         });
         setSummary(result.summary);
       } catch (error) {
@@ -65,7 +81,7 @@ export function SmartInsight() {
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={handleGenerateSummary} disabled={isPending}>
+        <Button onClick={handleGenerateSummary} disabled={isPending || !session}>
           <Wand2 className="mr-2 h-4 w-4" />
           {isPending ? "Generating..." : "Generate Summary"}
         </Button>
