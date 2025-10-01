@@ -8,7 +8,7 @@ import { ListeningByHourChart } from "@/components/charts/listening-by-hour-char
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { addDays, format, getHours, startOfDay } from "date-fns";
+import { format, getHours } from "date-fns";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const topTracks = await getTopTracks(timeRange);
@@ -44,9 +44,9 @@ async function StatsContent({ timeRange }: { timeRange: "short_term" | "medium_t
     const minutes = play.track.duration_ms / 60000;
     const existing = acc.find(d => d.date === date);
     if (existing) {
-      existing.minutes += minutes;
+      existing.minutes.push(minutes);
     } else {
-      acc.push({ date, minutes });
+      acc.push({ date, minutes: [minutes] });
     }
     return acc;
   }, [] as { date: string, minutes: number[] }[])
