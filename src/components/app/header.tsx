@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut, useSession } from "next-auth/react";
 
 const titleMap: { [key: string]: string } = {
-  "/dashboard": "Overview",
+  "/dashboard": "", // Title is now handled in the page itself
   "/dashboard/top-tracks": "Top Tracks",
   "/dashboard/top-artists": "Top Artists",
   "/dashboard/history": "Listening History",
@@ -24,7 +24,7 @@ const titleMap: { [key: string]: string } = {
 
 export function Header() {
   const pathname = usePathname();
-  const title = titleMap[pathname] || "Dashboard";
+  const title = titleMap[pathname];
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -34,7 +34,7 @@ export function Header() {
         <SidebarTrigger />
       </div>
 
-      <h1 className="text-xl font-semibold md:text-2xl">{title}</h1>
+      {title && <h1 className="text-xl font-semibold md:text-2xl">{title}</h1>}
 
       <div className="ml-auto">
         <DropdownMenu>

@@ -5,52 +5,78 @@ import { Clock, Disc, Mic, Music, Users } from "lucide-react";
 import { DailyMinutesChart } from "@/components/charts/daily-minutes-chart";
 import { RecentPlaysTable } from "@/components/app/recent-plays-table";
 import { ListeningByHourChart } from "@/components/charts/listening-by-hour-chart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function OverviewPage() {
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Time"
-          value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${stats.totalMinutes % 60}m`}
-          icon={Clock}
-        />
-        <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
-        <StatCard
-          title="New Artists"
-          value={stats.newArtists}
-          icon={Users}
-        />
-        <StatCard title="Top Decade" value={stats.decade} icon={Disc} />
+    <Tabs defaultValue="4-weeks">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold md:text-3xl">Overview</h1>
+        <TabsList>
+          <TabsTrigger value="4-weeks">4 Weeks</TabsTrigger>
+          <TabsTrigger value="6-months">6 Months</TabsTrigger>
+          <TabsTrigger value="all-time">All Time</TabsTrigger>
+        </TabsList>
       </div>
+      <TabsContent value="4-weeks">
+        {/* Content for 4 weeks */}
+        <div className="grid gap-6 mt-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Total Time"
+              value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${stats.totalMinutes % 60}m`}
+              icon={Clock}
+            />
+            <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
+            <StatCard
+              title="New Artists"
+              value={stats.newArtists}
+              icon={Users}
+            />
+            <StatCard title="Top Decade" value={stats.decade} icon={Disc} />
+          </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Listening</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DailyMinutesChart />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Listening by Hour</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ListeningByHourChart />
-          </CardContent>
-        </Card>
-      </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Daily Listening</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DailyMinutesChart />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Listening by Hour</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ListeningByHourChart />
+              </CardContent>
+            </Card>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recently Played</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RecentPlaysTable />
-        </CardContent>
-      </Card>
-    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recently Played</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RecentPlaysTable />
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
+      <TabsContent value="6-months">
+        {/* Content for 6 months */}
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
+          <p>6 Months data will be displayed here.</p>
+        </div>
+      </TabsContent>
+      <TabsContent value="all-time">
+        {/* Content for all time */}
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
+          <p>All Time data will be displayed here.</p>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }
