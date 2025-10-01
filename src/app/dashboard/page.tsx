@@ -12,7 +12,7 @@ import { format, getHours } from "date-fns";
 
 async function getStats(timeRange: "short_term" | "medium_term" | "long_term") {
   const [topTracks, topArtists] = await Promise.all([
-    getTopTracks(timeRange),
+    getTopTracks(timeRange, 50), // Fetch more tracks for a better estimate
     getTopArtists(timeRange),
   ]);
 
@@ -46,7 +46,7 @@ async function StatsContent({
 }) {
   const [stats, recentPlays] = await Promise.all([
     getStats(timeRange),
-    getRecentlyPlayed(50), // Fetch more for better charts
+    getRecentlyPlayed(50), // Fetch max for better charts
   ]);
 
   const dailyListeningData = recentPlays.items
@@ -67,6 +67,7 @@ async function StatsContent({
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+
   const hourlyListeningData = Array.from({ length: 24 }, (_, i) => ({
     hour: `${String(i).padStart(2, "0")}:00`,
     plays: 0,
@@ -84,12 +85,12 @@ async function StatsContent({
           value={`${Math.floor(stats.totalMinutes / 60).toLocaleString()}h ${
             stats.totalMinutes % 60
           }m`}
-          description={`Based on your top tracks for this period.`}
+          description={`Based on your top 50 tracks for this period.`}
           icon={Clock}
         />
         <StatCard title="Top Genre" value={stats.topGenre} icon={Music} />
-        <StatCard title="New Artists" value={stats.newArtists} icon={Users} />
-        <StatCard title="Top Decade" value={stats.decade} icon={Disc} />
+        <StatCard title="New Artists" value={0} icon={Users} description="Coming soon" />
+        <StatCard title="Top Decade" value="2020s" icon={Disc} description="Coming soon" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
