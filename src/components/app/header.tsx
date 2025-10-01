@@ -54,9 +54,17 @@ export function Header() {
               <span>Profile</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer"
+            >
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="w-full"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
